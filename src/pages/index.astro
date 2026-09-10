@@ -1,8 +1,31 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 3);
+
+const topics = [
+	{
+		label: 'Store setup',
+		body: 'Theme, navigation, and the twenty settings that actually move the needle.',
+	},
+	{
+		label: 'Conversion',
+		body: 'Product pages, pricing psychology, and checkout friction you can delete today.',
+	},
+	{
+		label: 'Apps & automation',
+		body: 'The small stack that replaces a part-time ops hire.',
+	},
+];
+
+const fmt = (d: Date) =>
+	d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 ---
 
 <!doctype html>
@@ -12,38 +35,296 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	</head>
 	<body>
 		<Header />
+
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<!-- Hero -->
+			<section class="hero">
+				<p class="eyebrow">Shopify, explained briefly</p>
+				<h1>Short, practical notes on building a Shopify store that sells.</h1>
+				<p class="lede">
+					No 4,000-word roundups. Just the setup, the tweaks, and the tools — written so you can
+					ship something today.
+				</p>
+				<div class="actions">
+					<a class="btn btn--primary" href="/blog/">Read the notes</a>
+					<a class="btn" href="/about/">About this site</a>
+				</div>
+			</section>
+
+			<!-- Latest posts -->
+			{
+				posts.length > 0 && (
+					<section class="section" aria-labelledby="latest">
+						<div class="section-head">
+							<h2 id="latest">Latest</h2>
+							<a class="more" href="/blog/">
+								All posts <span aria-hidden="true">→</span>
+							</a>
+						</div>
+
+						<ul class="posts">
+							{posts.map((post) => (
+								<li>
+									<a class="post" href={`/blog/${post.slug}/`}>
+										<time datetime={post.data.pubDate.toISOString()}>
+											{fmt(post.data.pubDate)}
+										</time>
+										<h3>{post.data.title}</h3>
+										<p>{post.data.description}</p>
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
+
+			<!-- What you'll find -->
+			<section class="section" aria-labelledby="topics">
+				<h2 id="topics">What you'll find here</h2>
+				<dl class="topics">
+					{topics.map((t) => (
+						<div>
+							<dt>{t.label}</dt>
+							<dd>{t.body}</dd>
+						</div>
+					))}
+				</dl>
+			</section>
+
+			<!-- Quiet CTA -->
+			<section class="cta">
+				<p>
+					New notes land every couple of weeks. No spam, no launch sequences — just the thing I
+					learned this week.
+				</p>
+				<a class="btn btn--primary" href="/newsletter/">Get the notes</a>
+			</section>
 		</main>
+
 		<Footer />
 	</body>
 </html>
+
+<style>
+	/* --- Tokens ---------------------------------------------------------- */
+	main {
+		--ink: #14161a;
+		--ink-soft: #5b6472;
+		--line: #e6e8ec;
+		--surface: #ffffff;
+		--accent: #3f6b2b; /* muted Shopify green */
+		--radius: 10px;
+		--measure: 62ch;
+
+		display: block;
+		max-width: 68rem;
+		margin: 0 auto;
+		padding: 0 1.25rem 6rem;
+		color: var(--ink);
+	}
+
+	/* --- Hero ------------------------------------------------------------ */
+	.hero {
+		padding: 5.5rem 0 4rem;
+		max-width: 44rem;
+	}
+
+	.eyebrow {
+		margin: 0 0 1rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--accent);
+	}
+
+	.hero h1 {
+		margin: 0;
+		font-size: clamp(2rem, 5vw, 3.25rem);
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+	}
+
+	.lede {
+		margin: 1.25rem 0 0;
+		max-width: var(--measure);
+		font-size: 1.125rem;
+		line-height: 1.65;
+		color: var(--ink-soft);
+		text-wrap: pretty;
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 2rem;
+	}
+
+	/* --- Buttons --------------------------------------------------------- */
+	.btn {
+		display: inline-block;
+		padding: 0.7rem 1.15rem;
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		text-decoration: none;
+		color: var(--ink);
+		background: var(--surface);
+		transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+	}
+
+	.btn:hover {
+		border-color: var(--ink);
+	}
+
+	.btn--primary {
+		background: var(--ink);
+		border-color: var(--ink);
+		color: #fff;
+	}
+
+	.btn--primary:hover {
+		background: var(--accent);
+		border-color: var(--accent);
+		transform: translateY(-1px);
+	}
+
+	/* --- Sections -------------------------------------------------------- */
+	.section {
+		padding: 3rem 0;
+		border-top: 1px solid var(--line);
+	}
+
+	.section-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.75rem;
+	}
+
+	.section h2 {
+		margin: 0;
+		font-size: 1.375rem;
+		letter-spacing: -0.01em;
+	}
+
+	.more {
+		font-size: 0.9375rem;
+		color: var(--ink-soft);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.more:hover {
+		color: var(--accent);
+	}
+
+	/* --- Post list ------------------------------------------------------- */
+	.posts {
+		display: grid;
+		gap: 1px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		background: var(--line);
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		overflow: hidden;
+	}
+
+	.post {
+		display: block;
+		padding: 1.5rem 1.75rem;
+		background: var(--surface);
+		text-decoration: none;
+		color: inherit;
+		transition: background-color 0.15s ease;
+	}
+
+	.post:hover {
+		background: #fafbfa;
+	}
+
+	.post time {
+		font-size: 0.8125rem;
+		color: var(--ink-soft);
+	}
+
+	.post h3 {
+		margin: 0.4rem 0 0.5rem;
+		font-size: 1.125rem;
+		letter-spacing: -0.01em;
+	}
+
+	.post:hover h3 {
+		color: var(--accent);
+	}
+
+	.post p {
+		margin: 0;
+		max-width: var(--measure);
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		color: var(--ink-soft);
+	}
+
+	/* --- Topics ---------------------------------------------------------- */
+	.topics {
+		display: grid;
+		gap: 2rem;
+		margin: 0;
+		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	}
+
+	.topics dt {
+		font-weight: 600;
+		margin-bottom: 0.4rem;
+	}
+
+	.topics dd {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		color: var(--ink-soft);
+	}
+
+	/* --- CTA ------------------------------------------------------------- */
+	.cta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1.25rem;
+		margin-top: 2rem;
+		padding: 1.75rem 2rem;
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		background: #fafbfa;
+	}
+
+	.cta p {
+		margin: 0;
+		max-width: 38ch;
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		color: var(--ink-soft);
+	}
+
+	/* --- A11y ------------------------------------------------------------ */
+	a:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 3px;
+		border-radius: 4px;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			transition: none !important;
+		}
+	}
+</style>

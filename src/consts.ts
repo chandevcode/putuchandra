@@ -1,5 +1,4 @@
-// Place any global data in this file.
-// You can import this data from anywhere in your site by using the `import` keyword.
+export const SITE_TITLE = 'Putu Chandra - Shopify Development & Tutorials';
 
-export const SITE_TITLE = 'Astro Blog';
-export const SITE_DESCRIPTION = 'Welcome to my website!';
+export const SITE_DESCRIPTION =
+  'Practical Shopify tutorials for merchants and developers. Learn how to customize your store, fix common problems, improve the shopping experience, and build better Shopify features.';
